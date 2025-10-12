@@ -1,0 +1,30 @@
+services:
+  mariadb:
+    image: mariadb:10.8
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+
+  frappe:
+    image: frappe/bench:latest
+    container_name: frappe-builder-frappe-1
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+      - redis
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    tty: true
+    stdin_open: true
+
+
+volumes:
+  mariadb_data:
+  frappe_bench_data:
