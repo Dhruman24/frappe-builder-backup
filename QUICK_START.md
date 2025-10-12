@@ -72,6 +72,7 @@ bench start
 ## Access Your Site
 
 🌐 **URL:** http://localhost:8000
+""Builder URL:**http://builder.localhost:8000/builder/
 
 👤 **Login:**
 - Username: `Administrator`
