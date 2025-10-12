@@ -58,9 +58,9 @@ docker cp ./backups/. frappe-builder-frappe-1:/home/frappe/frappe-bench/sites/bu
 # Access container again
 docker exec -it frappe-builder-frappe-1 bash
 
-# Inside container - restore backup
+# Inside container - restore backup (use the latest backup file)
 cd frappe-bench
-bench --site builder.localhost restore --force --with-public-files --with-private-files sites/builder.localhost/private/backups/20251012_041319-builder_localhost-database.sql.gz
+bench --site builder.localhost restore --force --with-public-files --with-private-files sites/builder.localhost/private/backups/20251012_075233-builder_localhost-database.sql.gz
 
 # Start the server
 bench use builder.localhost
