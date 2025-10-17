@@ -289,28 +289,10 @@ Then run the restore script again.
 **This error occurs when the Redis configuration is missing or incorrect.**
 
 **Solution:**
-Run these commands to fix the Redis configuration:
+Copy the configuration template to the container:
 ```cmd
-docker exec frappe-builder-frappe-1 bash -c "mkdir -p /home/frappe/frappe-bench/sites && cat > /home/frappe/frappe-bench/sites/common_site_config.json << 'EOF'
-{
-  \"background_workers\": 1,
-  \"file_watcher_port\": 6787,
-  \"frappe_user\": \"frappe\",
-  \"gunicorn_workers\": 4,
-  \"live_reload\": true,
-  \"rebase_on_pull\": false,
-  \"redis_cache\": \"redis://redis:6379\",
-  \"redis_queue\": \"redis://redis:6379\",
-  \"redis_socketio\": \"redis://redis:6379\",
-  \"restart_supervisor_on_update\": false,
-  \"restart_systemd_on_update\": false,
-  \"serve_default_site\": true,
-  \"shallow_clone\": true,
-  \"socketio_port\": 9000,
-  \"use_redis_auth\": false,
-  \"webserver_port\": 8000
-}
-EOF"
+docker exec frappe-builder-frappe-1 bash -c "mkdir -p /home/frappe/frappe-bench/sites"
+docker cp config\common_site_config.json frappe-builder-frappe-1:/home/frappe/frappe-bench/sites/common_site_config.json
 ```
 
 Then restart the containers and run the restore script again:
@@ -319,7 +301,29 @@ docker-compose restart
 scripts\restore.bat
 ```
 
-**Note:** The latest version of the restore script (updated after Oct 16, 2025) includes this fix automatically.
+**Note:** The latest version of the restore script (updated after Oct 17, 2025) includes this fix automatically.
+
+### Issue: "JSONDecodeError: Expecting value: line 1 column 1" when running bench start
+
+**This error means the `common_site_config.json` file is empty or corrupted.**
+
+**Solution:**
+1. Ensure the `config\common_site_config.json` template file exists in your project folder
+2. Copy it to the container:
+   ```cmd
+   docker cp config\common_site_config.json frappe-builder-frappe-1:/home/frappe/frappe-bench/sites/common_site_config.json
+   ```
+3. Verify the file was copied correctly:
+   ```cmd
+   docker exec frappe-builder-frappe-1 cat /home/frappe/frappe-bench/sites/common_site_config.json
+   ```
+   You should see valid JSON output with Redis configuration
+4. Try running `bench start` again:
+   ```cmd
+   docker exec -it frappe-builder-frappe-1 bash
+   cd frappe-bench
+   bench start
+   ```
 
 ### Issue: Login doesn't work
 

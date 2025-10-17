@@ -35,6 +35,13 @@ if not exist "backups" (
     exit /b 1
 )
 
+REM Check if config directory and template file exist
+if not exist "config\common_site_config.json" (
+    echo [ERROR] Redis configuration template not found at config\common_site_config.json
+    exit /b 1
+)
+echo [SUCCESS] Configuration template found
+
 REM Find the latest backup file
 for /f "delims=" %%i in ('dir /b /o-d "backups\*-database.sql.gz" 2^>nul') do (
     set DATABASE_BACKUP=%%i
@@ -58,26 +65,12 @@ echo [SUCCESS] Services should be ready
 
 echo.
 echo Step 4: Setting up Redis configuration...
-docker exec %CONTAINER_NAME% bash -c "mkdir -p /home/frappe/frappe-bench/sites && cat > /home/frappe/frappe-bench/sites/common_site_config.json << 'EOF'
-{
-  \"background_workers\": 1,
-  \"file_watcher_port\": 6787,
-  \"frappe_user\": \"frappe\",
-  \"gunicorn_workers\": 4,
-  \"live_reload\": true,
-  \"rebase_on_pull\": false,
-  \"redis_cache\": \"redis://redis:6379\",
-  \"redis_queue\": \"redis://redis:6379\",
-  \"redis_socketio\": \"redis://redis:6379\",
-  \"restart_supervisor_on_update\": false,
-  \"restart_systemd_on_update\": false,
-  \"serve_default_site\": true,
-  \"shallow_clone\": true,
-  \"socketio_port\": 9000,
-  \"use_redis_auth\": false,
-  \"webserver_port\": 8000
-}
-EOF"
+docker exec %CONTAINER_NAME% bash -c "mkdir -p /home/frappe/frappe-bench/sites"
+docker cp "config\common_site_config.json" "%CONTAINER_NAME%:/home/frappe/frappe-bench/sites/common_site_config.json"
+if errorlevel 1 (
+    echo [ERROR] Failed to copy Redis configuration. Please check if config\common_site_config.json exists.
+    exit /b 1
+)
 echo [SUCCESS] Redis configuration created
 
 echo.
