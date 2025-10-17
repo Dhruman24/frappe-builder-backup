@@ -57,7 +57,31 @@ timeout /t 60 /nobreak >nul
 echo [SUCCESS] Services should be ready
 
 echo.
-echo Step 4: Creating new site (if needed)...
+echo Step 4: Setting up Redis configuration...
+docker exec %CONTAINER_NAME% bash -c "mkdir -p /home/frappe/frappe-bench/sites && cat > /home/frappe/frappe-bench/sites/common_site_config.json << 'EOF'
+{
+  \"background_workers\": 1,
+  \"file_watcher_port\": 6787,
+  \"frappe_user\": \"frappe\",
+  \"gunicorn_workers\": 4,
+  \"live_reload\": true,
+  \"rebase_on_pull\": false,
+  \"redis_cache\": \"redis://redis:6379\",
+  \"redis_queue\": \"redis://redis:6379\",
+  \"redis_socketio\": \"redis://redis:6379\",
+  \"restart_supervisor_on_update\": false,
+  \"restart_systemd_on_update\": false,
+  \"serve_default_site\": true,
+  \"shallow_clone\": true,
+  \"socketio_port\": 9000,
+  \"use_redis_auth\": false,
+  \"webserver_port\": 8000
+}
+EOF"
+echo [SUCCESS] Redis configuration created
+
+echo.
+echo Step 5: Creating new site (if needed)...
 docker exec %CONTAINER_NAME% bash -c "cd frappe-bench && bench new-site %SITE_NAME% --force --db-root-password %DB_ROOT_PASSWORD% --admin-password %ADMIN_PASSWORD%" 2>nul
 if errorlevel 1 (
     echo [WARNING] Site might already exist, continuing...
@@ -66,27 +90,27 @@ if errorlevel 1 (
 )
 
 echo.
-echo Step 5: Installing builder app...
+echo Step 6: Installing builder app...
 docker exec %CONTAINER_NAME% bash -c "cd frappe-bench && bench --site %SITE_NAME% install-app builder"
 echo [SUCCESS] Builder app installed
 
 echo.
-echo Step 6: Copying backup files to container...
+echo Step 7: Copying backup files to container...
 docker cp ".\backups\." "%CONTAINER_NAME%:/home/frappe/frappe-bench/sites/%SITE_NAME%/private/backups/"
 echo [SUCCESS] Backup files copied
 
 echo.
-echo Step 7: Restoring database and files...
+echo Step 8: Restoring database and files...
 docker exec %CONTAINER_NAME% bash -c "cd frappe-bench && bench --site %SITE_NAME% restore --force --with-public-files --with-private-files sites/%SITE_NAME%/private/backups/%DATABASE_BACKUP%"
 echo [SUCCESS] Backup restored
 
 echo.
-echo Step 8: Clearing cache...
+echo Step 9: Clearing cache...
 docker exec %CONTAINER_NAME% bash -c "cd frappe-bench && bench --site %SITE_NAME% clear-cache"
 echo [SUCCESS] Cache cleared
 
 echo.
-echo Step 9: Setting up site for access...
+echo Step 10: Setting up site for access...
 docker exec %CONTAINER_NAME% bash -c "cd frappe-bench && bench use %SITE_NAME%"
 echo [SUCCESS] Site configured
 
