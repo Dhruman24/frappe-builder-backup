@@ -174,15 +174,15 @@ If you prefer to do it step-by-step or if the script doesn't work:
 
 5. **Find the latest backup** (check the `backups` folder for the newest timestamp):
    ```
-   Latest backup: 20251016_161635
+   Latest backup: 20251017_064229
    ```
 
 6. **Copy backup files to the container:**
    ```cmd
-   docker cp backups\20251016_161635-builder_localhost-database.sql.gz frappe-builder-frappe-1:/home/frappe/frappe-bench/sites/builder.localhost/
-   docker cp backups\20251016_161635-builder_localhost-files.tar frappe-builder-frappe-1:/home/frappe/frappe-bench/sites/builder.localhost/
-   docker cp backups\20251016_161635-builder_localhost-private-files.tar frappe-builder-frappe-1:/home/frappe/frappe-bench/sites/builder.localhost/
-   docker cp backups\20251016_161635-builder_localhost-site_config_backup.json frappe-builder-frappe-1:/home/frappe/frappe-bench/sites/builder.localhost/
+   docker cp backups\20251017_064229-builder_localhost-database.sql.gz frappe-builder-frappe-1:/home/frappe/frappe-bench/sites/builder.localhost/
+   docker cp backups\20251017_064229-builder_localhost-files.tar frappe-builder-frappe-1:/home/frappe/frappe-bench/sites/builder.localhost/
+   docker cp backups\20251017_064229-builder_localhost-private-files.tar frappe-builder-frappe-1:/home/frappe/frappe-bench/sites/builder.localhost/
+   docker cp backups\20251017_064229-builder_localhost-site_config_backup.json frappe-builder-frappe-1:/home/frappe/frappe-bench/sites/builder.localhost/
    ```
 
 7. **Access the container again:**
@@ -193,7 +193,7 @@ If you prefer to do it step-by-step or if the script doesn't work:
 8. **Restore the backup:**
    ```bash
    cd /home/frappe/frappe-bench/sites/builder.localhost
-   bench --site builder.localhost --force restore 20251016_161635-builder_localhost-database.sql.gz --with-public-files 20251016_161635-builder_localhost-files.tar --with-private-files 20251016_161635-builder_localhost-private-files.tar
+   bench --site builder.localhost --force restore 20251017_064229-builder_localhost-database.sql.gz --with-public-files 20251017_064229-builder_localhost-files.tar --with-private-files 20251017_064229-builder_localhost-private-files.tar
    ```
 
 9. **Clear all caches:**
@@ -423,9 +423,9 @@ The `backups` folder contains timestamped backup sets. Each set has 4 files:
 | `*-private-files.tar` | Private files (internal system files) |
 | `*-site_config_backup.json` | Site configuration (database credentials, Redis config) |
 
-**Latest Backup:** `20251016_161635` (October 16, 2025, 4:16 PM)
+**Latest Backup:** `20251017_064229` (October 17, 2025, 6:42 AM)
 
-This backup contains all the current progress and web pages.
+This backup contains all the current progress and web pages, including the Redis configuration fix.
 
 ---
 
