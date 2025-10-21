@@ -1,18 +1,20 @@
 @echo off
-REM Frappe Builder - Automated Restore Script for Windows
-REM This script automates the process of restoring the Frappe Builder site
+REM Frappe Builder + CRM + Lexicon - Restore Script for Windows
+REM Last Updated: October 21, 2025
+REM Backup Version: 20251021_140539
 
-echo ================================================
-echo Frappe Builder - Automated Restore Script
-echo ================================================
-echo Version: 2.0 (Enhanced)
+echo ===============================================
+echo Frappe Builder + CRM + Lexicon Restore Script
+echo ===============================================
+echo Version: 3.0 (Complete with CRM + Lexicon)
 echo.
 
 REM Configuration
 set CONTAINER_NAME=frappe-builder-frappe-1
 set SITE_NAME=builder.localhost
-set DB_ROOT_PASSWORD=root
+set DB_ROOT_PASSWORD=123
 set ADMIN_PASSWORD=admin
+set BACKUP_DATE=20251021_140539
 
 REM Enable debug mode if DEBUG=1 is set
 if "%DEBUG%"=="1" (
@@ -206,21 +208,64 @@ if errorlevel 1 (
 echo [SUCCESS] Backup files copied successfully
 
 echo.
-echo Step 11: Restoring database and files...
-echo [INFO] Restoring from backup: %DATABASE_BACKUP%
+echo Step 11: Restoring database...
+echo [INFO] Restoring database from backup: %BACKUP_DATE%-builder_localhost-database.sql.gz
 echo [INFO] This may take several minutes...
-if "%DEBUG%"=="1" echo [DEBUG] Running: bench --site %SITE_NAME% restore...
-docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% restore --force --with-public-files --with-private-files sites/%SITE_NAME%/private/backups/%DATABASE_BACKUP%"
+docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% restore --force sites/%SITE_NAME%/private/backups/%BACKUP_DATE%-builder_localhost-database.sql.gz"
 if errorlevel 1 (
-    echo [ERROR] Failed to restore backup. Check the error messages above.
+    echo [ERROR] Failed to restore database. Check the error messages above.
     pause
     exit /b 1
 )
-echo [SUCCESS] Backup restored successfully
+echo [SUCCESS] Database restored successfully
 
 echo.
-echo Step 12: Clearing cache...
-if "%DEBUG%"=="1" echo [DEBUG] Running: bench --site %SITE_NAME% clear-cache
+echo Step 12: Restoring public files...
+docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% restore --force --with-public-files sites/%SITE_NAME%/private/backups/%BACKUP_DATE%-builder_localhost-files.tar"
+if errorlevel 1 (
+    echo [WARNING] Public files restore had issues, continuing...
+) else (
+    echo [SUCCESS] Public files restored
+)
+
+echo.
+echo Step 13: Restoring private files...
+docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% restore --force --with-private-files sites/%SITE_NAME%/private/backups/%BACKUP_DATE%-builder_localhost-private-files.tar"
+if errorlevel 1 (
+    echo [WARNING] Private files restore had issues, continuing...
+) else (
+    echo [SUCCESS] Private files restored
+)
+
+echo.
+echo Step 14: Installing CRM and Lexicon apps...
+echo [INFO] Installing Frappe CRM...
+docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% install-app crm" 2>nul
+if errorlevel 1 (
+    echo [INFO] CRM app already installed or not found in apps directory
+) else (
+    echo [SUCCESS] CRM app installed
+)
+
+echo [INFO] Installing Lexicon app...
+docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% install-app lexicon" 2>nul
+if errorlevel 1 (
+    echo [INFO] Lexicon app already installed or not found in apps directory
+) else (
+    echo [SUCCESS] Lexicon app installed
+)
+
+echo.
+echo Step 15: Running database migration...
+docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% migrate"
+if errorlevel 1 (
+    echo [WARNING] Migration had issues, but continuing...
+) else (
+    echo [SUCCESS] Database migration completed
+)
+
+echo.
+echo Step 16: Clearing cache...
 docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% clear-cache"
 if errorlevel 1 (
     echo [WARNING] Failed to clear cache, but continuing...
@@ -229,47 +274,55 @@ if errorlevel 1 (
 )
 
 echo.
-echo Step 13: Setting up site for access...
-if "%DEBUG%"=="1" echo [DEBUG] Running: bench use %SITE_NAME%
-docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench use %SITE_NAME%"
-if errorlevel 1 (
-    echo [WARNING] Failed to set default site, but continuing...
-) else (
-    echo [SUCCESS] Site configured as default
-)
+echo Step 17: Restarting bench...
+docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench restart"
+echo [SUCCESS] Bench restarted
 
 echo.
-echo ================================================
-echo Restoration Complete!
-echo ================================================
+echo ===============================================
+echo ✓ Restoration Complete!
+echo ===============================================
 echo.
-echo To start the Frappe development server:
-echo   1. Run: docker exec -it %CONTAINER_NAME% bash
-echo   2. Run: cd frappe-bench
-echo   3. Run: bench start
-echo.
-echo Then access your site at: http://localhost:8000
+echo Your site is ready at: http://builder.localhost:8000
 echo.
 echo Login Credentials:
 echo   Username: Administrator
 echo   Password: %ADMIN_PASSWORD%
 echo.
+echo Installed Applications:
+echo   - Frappe Framework (v15.85.0)
+echo   - Builder (v1.18.0)
+echo   - Frappe CRM (v1.53.1)
+echo   - Lexicon (v0.0.1)
+echo.
+echo Available URLs:
+echo   - Main Site: http://builder.localhost:8000
+echo   - Vendor Management: http://builder.localhost:8000/app/vendor
+echo   - Waitlist: http://builder.localhost:8000/app/waitlist
+echo   - Lexicon Directory: http://builder.localhost:8000/app/vendors
+echo   - Frappe CRM: http://builder.localhost:8000/app/crm
+echo.
+echo What's Included:
+echo   ✓ 5 Sample Vendors (Vendor 1-5)
+echo   ✓ Custom Vendor and Waitlist Doctypes
+echo   ✓ Lexicon Vendors Directory Page
+echo   ✓ Full Frappe CRM (Leads, Deals, Organizations, Contacts)
+echo.
 echo [WARNING] IMPORTANT: Change the default password after first login!
 echo.
-echo ================================================
-echo Troubleshooting Tips:
-echo ================================================
+echo ===============================================
+echo Troubleshooting:
+echo ===============================================
 echo.
-echo If you encounter errors:
-echo   1. Make sure Docker Desktop is running
-echo   2. Run from the project root directory (not scripts/)
-echo   3. Check that backups\ directory contains backup files
-echo   4. Enable debug mode: set DEBUG=1 ^&^& scripts\restore.bat
-echo   5. Check container logs: docker logs %CONTAINER_NAME%
+echo If you encounter issues:
+echo   1. Check Docker Desktop is running
+echo   2. Verify containers: docker ps
+echo   3. View logs: docker logs %CONTAINER_NAME% -f
+echo   4. Restart container: docker restart %CONTAINER_NAME%
+echo   5. See SETUP_FOR_TEAMMATE.md for detailed help
 echo.
-echo For common issues:
-echo   - "bench not found": Container might not be properly initialized
-echo   - "No such option --site": Wrong directory or bench version issue
-echo   - "Permission denied": Docker may need admin privileges
+echo For more information, read:
+echo   - COMPLETE_PROJECT_GUIDE.md (full documentation)
+echo   - SETUP_FOR_TEAMMATE.md (setup guide)
 echo.
 pause

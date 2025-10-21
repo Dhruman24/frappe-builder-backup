@@ -1,0 +1,10 @@
+{
+ "db_host": "mariadb",
+ "db_name": "_f2c59d1a6ecb43cb",
+ "db_password": "h0yDOyDl5EjcXEcQ",
+ "db_type": "mariadb",
+ "encryption_key": "zknxeNxcQngKcThSZKN0rsjq2BiTnOaadTB85rzA8K0=",
+ "redis_cache": "redis://redis:6379",
+ "redis_queue": "redis://redis:6379",
+ "redis_socketio": "redis://redis:6379"
+}

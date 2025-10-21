@@ -1,0 +1,152 @@
+{
+  "custom_doctypes": [
+    {
+      "name": "Vendor",
+      "module": "Vendor Manager",
+      "custom": 1,
+      "autoname": "field:vendor_name",
+      "naming_rule": "By fieldname",
+      "fields": [
+        {
+          "fieldname": "vendor_name",
+          "fieldtype": "Data",
+          "label": "Vendor Name",
+          "reqd": 1
+        },
+        {
+          "fieldname": "type",
+          "fieldtype": "Select",
+          "label": "Type",
+          "options": "Supplier\nPartner\nDistributor"
+        },
+        {
+          "fieldname": "email",
+          "fieldtype": "Data",
+          "label": "Email"
+        },
+        {
+          "fieldname": "phone",
+          "fieldtype": "Data",
+          "label": "Phone"
+        },
+        {
+          "fieldname": "status",
+          "fieldtype": "Select",
+          "label": "Status",
+          "options": "Active\nInactive",
+          "default": "Active"
+        },
+        {
+          "fieldname": "description",
+          "fieldtype": "Text",
+          "label": "Description"
+        }
+      ],
+      "permissions": [
+        {
+          "role": "System Manager",
+          "read": 1,
+          "write": 1,
+          "create": 1,
+          "delete": 1
+        }
+      ]
+    },
+    {
+      "name": "Waitlist",
+      "module": "Vendor Manager",
+      "custom": 1,
+      "autoname": "naming_series:",
+      "naming_rule": "By Naming Series",
+      "fields": [
+        {
+          "fieldname": "naming_series",
+          "fieldtype": "Select",
+          "label": "Series",
+          "options": "WL-.####",
+          "default": "WL-.####",
+          "reqd": 1
+        },
+        {
+          "fieldname": "full_name",
+          "fieldtype": "Data",
+          "label": "Full Name",
+          "reqd": 1
+        },
+        {
+          "fieldname": "email",
+          "fieldtype": "Data",
+          "label": "Email",
+          "reqd": 1
+        },
+        {
+          "fieldname": "vendor_type",
+          "fieldtype": "Link",
+          "label": "Vendor Type",
+          "options": "Vendor"
+        },
+        {
+          "fieldname": "notes",
+          "fieldtype": "Text",
+          "label": "Notes"
+        }
+      ],
+      "permissions": [
+        {
+          "role": "System Manager",
+          "read": 1,
+          "write": 1,
+          "create": 1,
+          "delete": 1
+        }
+      ]
+    }
+  ],
+  "sample_vendors": [
+    {
+      "vendor_name": "Vendor 1",
+      "type": "Supplier",
+      "email": "vendor1@example.com",
+      "phone": "+1-555-0101",
+      "status": "Active",
+      "description": "Primary supplier for raw materials"
+    },
+    {
+      "vendor_name": "Vendor 2",
+      "type": "Supplier",
+      "email": "vendor2@example.com",
+      "phone": "+1-555-0102",
+      "status": "Active",
+      "description": "Secondary supplier for backup inventory"
+    },
+    {
+      "vendor_name": "Vendor 3",
+      "type": "Partner",
+      "email": "vendor3@example.com",
+      "phone": "+1-555-0103",
+      "status": "Active",
+      "description": "Strategic business partner"
+    },
+    {
+      "vendor_name": "Vendor 4",
+      "type": "Distributor",
+      "email": "vendor4@example.com",
+      "phone": "+1-555-0104",
+      "status": "Active",
+      "description": "Main distribution channel partner"
+    },
+    {
+      "vendor_name": "Vendor 5",
+      "type": "Supplier",
+      "email": "vendor5@example.com",
+      "phone": "+1-555-0105",
+      "status": "Inactive",
+      "description": "Previous supplier (discontinued)"
+    }
+  ],
+  "notes": {
+    "creation_method": "These custom doctypes should be created via Frappe UI or using bench console",
+    "backup_includes": "Full database backup includes these doctypes and their data",
+    "restore_note": "After restoring backup, these doctypes will be automatically available"
+  }
+}
