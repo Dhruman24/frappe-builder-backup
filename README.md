@@ -2,6 +2,32 @@
 
 This repository contains a complete backup of a Frappe Builder site with custom web pages. This package can be easily deployed on any machine with Docker installed.
 
+## 🚨 Important Notes
+
+### Common Setup Issue - READ THIS FIRST!
+
+**Most common error**: `WARN: Command not being executed in bench directory`
+
+**Solution**: Always run bench commands from `/home/frappe/frappe-bench` directory!
+
+```bash
+# ❌ WRONG - This will fail
+docker exec -it frappe-builder-frappe-1 bash
+bench new-site builder.localhost
+
+# ✅ CORRECT - This will work
+docker exec -it frappe-builder-frappe-1 bash
+cd frappe-bench
+bench new-site builder.localhost
+```
+
+### Documentation Resources
+
+- **🚀 Quick Fix Guide**: See [QUICK_FIX_FOR_COLLEAGUE.md](QUICK_FIX_FOR_COLLEAGUE.md) for immediate solutions
+- **📖 Bench Commands Guide**: See [BENCH_COMMANDS_GUIDE.md](BENCH_COMMANDS_GUIDE.md) for all bench commands
+- **🔧 Troubleshooting**: See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for detailed error solutions
+- **⚡ Automated Setup**: Use `scripts\restore.bat` (Windows) or `scripts/restore.sh` (Linux/Mac)
+
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed on your system:
