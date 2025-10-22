@@ -106,18 +106,31 @@ docker exec frappe-builder-frappe-1 sh -c "cd frappe-bench && bench --site build
 
 ---
 
-## Step 5: Install Apps
+## Step 5: Install Custom Apps
+
+First, copy the custom apps from the repository to the container:
+
+```bash
+# Copy Lexicon app (Custom Vendor Directory)
+docker cp apps/lexicon frappe-builder-frappe-1:/home/frappe/frappe-bench/apps/
+
+# Copy Vendor Manager app
+docker cp apps/vendor-manager frappe-builder-frappe-1:/home/frappe/frappe-bench/apps/
+```
+
+Then install all apps:
 
 ```bash
 docker exec -it frappe-builder-frappe-1 bash
 cd frappe-bench
 
-# Install Frappe CRM
+# Install Frappe CRM (from official repo)
 bench get-app crm
 bench --site builder.localhost install-app crm
 
-# Install Lexicon (Custom Vendor Directory)
+# Install Custom Apps (already copied to container)
 bench --site builder.localhost install-app lexicon
+bench --site builder.localhost install-app vendor-manager
 
 # Migrate database
 bench --site builder.localhost migrate
@@ -295,6 +308,9 @@ docker-compose restart
 ```
 C:\Users\[YourUsername]\frappe-builder\
 ├── docker-compose.yml         # Docker configuration
+├── apps\                      # Custom Frappe apps
+│   ├── lexicon\              # Custom vendor directory app
+│   └── vendor-manager\       # Vendor management app
 ├── backups\                   # Database and file backups
 │   ├── 20251021_140539-builder_localhost-database.sql.gz
 │   ├── 20251021_140539-builder_localhost-site_config_backup.json

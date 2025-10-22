@@ -238,7 +238,25 @@ if errorlevel 1 (
 )
 
 echo.
-echo Step 14: Installing CRM and Lexicon apps...
+echo Step 14: Copying custom apps to container...
+echo [INFO] Copying Lexicon app...
+docker cp apps/lexicon %CONTAINER_NAME%:/home/frappe/frappe-bench/apps/
+if errorlevel 1 (
+    echo [WARNING] Failed to copy Lexicon app
+) else (
+    echo [SUCCESS] Lexicon app copied
+)
+
+echo [INFO] Copying Vendor Manager app...
+docker cp apps/vendor-manager %CONTAINER_NAME%:/home/frappe/frappe-bench/apps/
+if errorlevel 1 (
+    echo [WARNING] Failed to copy Vendor Manager app
+) else (
+    echo [SUCCESS] Vendor Manager app copied
+)
+
+echo.
+echo Step 15: Installing CRM and custom apps...
 echo [INFO] Installing Frappe CRM...
 docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% install-app crm" 2>nul
 if errorlevel 1 (
@@ -255,8 +273,16 @@ if errorlevel 1 (
     echo [SUCCESS] Lexicon app installed
 )
 
+echo [INFO] Installing Vendor Manager app...
+docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% install-app vendor-manager" 2>nul
+if errorlevel 1 (
+    echo [INFO] Vendor Manager app already installed or not found in apps directory
+) else (
+    echo [SUCCESS] Vendor Manager app installed
+)
+
 echo.
-echo Step 15: Running database migration...
+echo Step 16: Running database migration...
 docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% migrate"
 if errorlevel 1 (
     echo [WARNING] Migration had issues, but continuing...
@@ -265,7 +291,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Step 16: Clearing cache...
+echo Step 17: Clearing cache...
 docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% clear-cache"
 if errorlevel 1 (
     echo [WARNING] Failed to clear cache, but continuing...
@@ -274,7 +300,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Step 17: Restarting bench...
+echo Step 18: Restarting bench...
 docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench restart"
 echo [SUCCESS] Bench restarted
 

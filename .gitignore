@@ -62,3 +62,6 @@ docker-compose.override.yml
 
 # Don't ignore the actual backups - we want them in the repo!
 # backups/ (commented out - we want these in the repo)
+
+# Custom apps directory - we want these in the repo!
+# apps/ (commented out - we want these custom apps in the repo)

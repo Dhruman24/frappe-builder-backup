@@ -1,0 +1,14 @@
+{
+  "name": "vendors",
+  "title": "Vendors Directory",
+  "icon": "fa fa-address-book",
+  "idx": 0,
+  "docstatus": 0,
+  "doctype": "Page",
+  "module": "Lexicon",
+  "standard": "Yes",
+  "page_name": "vendors",
+  "modified": "2025-10-21 00:00:00.000000",
+  "modified_by": "Administrator",
+  "owner": "Administrator"
+}
