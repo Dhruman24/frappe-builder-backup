@@ -256,11 +256,20 @@ if errorlevel 1 (
 )
 
 echo.
-echo Step 15: Installing CRM and custom apps...
-echo [INFO] Installing Frappe CRM...
+echo Step 15: Installing vendor-manager in Python environment...
+docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && ./env/bin/pip install -e apps/vendor-manager"
+if errorlevel 1 (
+    echo [WARNING] Failed to install vendor-manager in Python environment
+) else (
+    echo [SUCCESS] Vendor-manager installed in Python environment
+)
+
+echo.
+echo Step 16: Installing CRM and custom apps...
+echo [INFO] Installing Frappe CRM (optional)...
 docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% install-app crm" 2>nul
 if errorlevel 1 (
-    echo [INFO] CRM app already installed or not found in apps directory
+    echo [INFO] CRM app skipped or already installed
 ) else (
     echo [SUCCESS] CRM app installed
 )
@@ -274,7 +283,7 @@ if errorlevel 1 (
 )
 
 echo [INFO] Installing Vendor Manager app...
-docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% install-app vendor-manager" 2>nul
+docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% install-app vendor_manager" 2>nul
 if errorlevel 1 (
     echo [INFO] Vendor Manager app already installed or not found in apps directory
 ) else (
@@ -282,7 +291,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Step 16: Running database migration...
+echo Step 17: Running database migration...
 docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% migrate"
 if errorlevel 1 (
     echo [WARNING] Migration had issues, but continuing...
@@ -291,7 +300,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Step 17: Clearing cache...
+echo Step 18: Clearing cache...
 docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench --site %SITE_NAME% clear-cache"
 if errorlevel 1 (
     echo [WARNING] Failed to clear cache, but continuing...
@@ -300,7 +309,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Step 18: Restarting bench...
+echo Step 19: Restarting bench...
 docker exec %CONTAINER_NAME% bash -c "cd /home/frappe/frappe-bench && bench restart"
 echo [SUCCESS] Bench restarted
 

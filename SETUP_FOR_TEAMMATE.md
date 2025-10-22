@@ -124,13 +124,16 @@ Then install all apps:
 docker exec -it frappe-builder-frappe-1 bash
 cd frappe-bench
 
-# Install Frappe CRM (from official repo)
+# Install vendor-manager in editable mode (required for Python to find it)
+./env/bin/pip install -e apps/vendor-manager
+
+# Install Frappe CRM (from official repo) - OPTIONAL
 bench get-app crm
 bench --site builder.localhost install-app crm
 
-# Install Custom Apps (already copied to container)
+# Install Custom Apps
 bench --site builder.localhost install-app lexicon
-bench --site builder.localhost install-app vendor-manager
+bench --site builder.localhost install-app vendor_manager
 
 # Migrate database
 bench --site builder.localhost migrate
@@ -182,8 +185,9 @@ exit
 |------------|---------|---------|
 | **Frappe Framework** | v15.85.0 | Core framework |
 | **Builder** | v1.18.0 | Page builder tool |
-| **Frappe CRM** | v1.53.1 | Official CRM with 50+ doctypes |
-| **Lexicon** | v0.0.1 | Custom vendor directory |
+| **Lexicon** | v0.0.1 | Vendor directory with Auth0 login |
+| **Vendor Manager** | v0.0.1 | Vendor & Waitlist management with Auth0 login |
+| **Frappe CRM** | v1.53.1 | Official CRM (optional) |
 
 ---
 

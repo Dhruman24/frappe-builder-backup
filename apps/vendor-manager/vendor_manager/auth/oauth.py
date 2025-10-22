@@ -6,11 +6,11 @@ import json
 
 @frappe.whitelist(allow_guest=True)
 def auth0_login():
-    """Initiate Auth0 login flow for Lexicon"""
+    """Initiate Auth0 login flow for Vendor Manager"""
     auth0_domain = frappe.conf.get('auth0_domain')
-    client_id = frappe.conf.get('auth0_lexicon_client_id')
-    redirect_uri = f"{frappe.utils.get_url()}/api/method/lexicon.lexicon.auth.oauth.lexicon_callback"
-    
+    client_id = frappe.conf.get('auth0_vendor_manager_client_id')
+    redirect_uri = f"{frappe.utils.get_url()}/api/method/vendor_manager.auth.oauth.vendor_manager_callback"
+
     params = {
         'response_type': 'code',
         'client_id': client_id,
@@ -18,25 +18,25 @@ def auth0_login():
         'scope': 'openid profile email',
         'state': frappe.generate_hash(length=20)
     }
-    
+
     auth_url = f"https://{auth0_domain}/authorize?{urlencode(params)}"
     frappe.local.response['type'] = 'redirect'
     frappe.local.response['location'] = auth_url
 
 @frappe.whitelist(allow_guest=True)
-def lexicon_callback(code=None, state=None, error=None):
-    """Handle Auth0 callback for Lexicon"""
+def vendor_manager_callback(code=None, state=None, error=None):
+    """Handle Auth0 callback for Vendor Manager"""
     if error:
         frappe.throw(_(f"Auth0 Error: {error}"))
-    
+
     if not code:
         frappe.throw(_("Authorization code not received"))
-    
+
     auth0_domain = frappe.conf.get('auth0_domain')
-    client_id = frappe.conf.get('auth0_lexicon_client_id')
-    client_secret = frappe.conf.get('auth0_lexicon_client_secret')
-    redirect_uri = f"{frappe.utils.get_url()}/api/method/lexicon.lexicon.auth.oauth.lexicon_callback"
-    
+    client_id = frappe.conf.get('auth0_vendor_manager_client_id')
+    client_secret = frappe.conf.get('auth0_vendor_manager_client_secret')
+    redirect_uri = f"{frappe.utils.get_url()}/api/method/vendor_manager.auth.oauth.vendor_manager_callback"
+
     # Exchange code for token
     token_url = f"https://{auth0_domain}/oauth/token"
     token_data = {
@@ -46,43 +46,43 @@ def lexicon_callback(code=None, state=None, error=None):
         'code': code,
         'redirect_uri': redirect_uri
     }
-    
+
     response = requests.post(token_url, json=token_data)
     tokens = response.json()
-    
+
     if 'access_token' not in tokens:
         frappe.throw(_("Failed to get access token"))
-    
+
     # Get user info
     userinfo_url = f"https://{auth0_domain}/userinfo"
     headers = {'Authorization': f"Bearer {tokens['access_token']}"}
     user_response = requests.get(userinfo_url, headers=headers)
     user_info = user_response.json()
-    
-    # Create or update Frappe user with Lexicon prefix
+
+    # Create or update Frappe user with Vendor Manager prefix
     auth0_email = user_info.get('email')
     if auth0_email:
-        # Use prefixed email for Lexicon users to separate from CRM users
-        lexicon_email = f"lexicon-{auth0_email}"
+        # Use prefixed email for Vendor Manager users to separate from Lexicon users
+        vendor_manager_email = f"vendor-{auth0_email}"
 
-        # IMPORTANT: Check if CRM user exists with same base email
+        # IMPORTANT: Check if Lexicon user exists with same base email
         # This prevents accidental cross-login
-        crm_email = f"crm-{auth0_email}"
-        if frappe.db.exists('User', crm_email):
-            frappe.logger().warning(f"CRM user {crm_email} exists. Creating separate Lexicon user: {lexicon_email}")
+        lexicon_email = f"lexicon-{auth0_email}"
+        if frappe.db.exists('User', lexicon_email):
+            frappe.logger().warning(f"Lexicon user {lexicon_email} exists. Creating separate Vendor Manager user: {vendor_manager_email}")
 
         user = None
-        if not frappe.db.exists('User', lexicon_email):
-            # Create new Lexicon user
+        if not frappe.db.exists('User', vendor_manager_email):
+            # Create new Vendor Manager user
             user = frappe.get_doc({
                 'doctype': 'User',
-                'email': lexicon_email,
+                'email': vendor_manager_email,
                 'first_name': user_info.get('given_name', auth0_email.split('@')[0]),
                 'last_name': user_info.get('family_name', ''),
                 'enabled': 1,
                 'user_type': 'System User',
                 'send_welcome_email': 0,
-                'bio': f"Lexicon user authenticated via Auth0 ({auth0_email})"
+                'bio': f"Vendor Manager user authenticated via Auth0 ({auth0_email})"
             })
             user.insert(ignore_permissions=True)
 
@@ -90,9 +90,9 @@ def lexicon_callback(code=None, state=None, error=None):
             user.add_roles('System Manager', 'Desk User')
             frappe.db.commit()
 
-            frappe.logger().info(f"Created new Lexicon user: {lexicon_email} from Auth0 email: {auth0_email}")
+            frappe.logger().info(f"Created new Vendor Manager user: {vendor_manager_email} from Auth0 email: {auth0_email}")
         else:
-            user = frappe.get_doc('User', lexicon_email)
+            user = frappe.get_doc('User', vendor_manager_email)
             # Ensure user has essential roles
             essential_roles = ['System Manager', 'Desk User']
             current_roles = [d.role for d in user.roles]
@@ -103,9 +103,9 @@ def lexicon_callback(code=None, state=None, error=None):
                 user.save(ignore_permissions=True)
                 frappe.db.commit()
 
-        # Login the Lexicon-specific user
-        frappe.local.login_manager.login_as(lexicon_email)
+        # Login the Vendor Manager-specific user
+        frappe.local.login_manager.login_as(vendor_manager_email)
         frappe.local.response['type'] = 'redirect'
-        frappe.local.response['location'] = '/app/vendors'  # Redirect to Lexicon vendors page
+        frappe.local.response['location'] = '/app/vendor'  # Redirect to Vendor list
     else:
         frappe.throw(_("Email not found in Auth0 user info"))

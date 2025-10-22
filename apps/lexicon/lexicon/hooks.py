@@ -248,3 +248,9 @@ app_license = "mit"
 
 # Note: Uncomment the above line to enable Auth0-based Lexicon access control
 # Make sure to configure Auth0 client credentials in common_site_config.json
+
+# Override login page to add Auth0 buttons
+# This will replace the default Frappe login page with our custom one
+website_route_rules = [
+    {"from_route": "/login", "to_route": "login"},
+]

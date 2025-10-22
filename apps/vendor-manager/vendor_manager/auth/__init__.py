@@ -1,0 +1,1 @@
+# Vendor Manager Auth module

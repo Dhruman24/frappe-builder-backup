@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexicon Login - Vendor Directory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 400px;
+            width: 100%;
+        }
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .login-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .login-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        .login-body {
+            padding: 40px 30px;
+        }
+        .auth-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 15px;
+        }
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .info-text {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .feature-list {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .feature-list h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .feature-list ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .feature-list li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Lexicon</h1>
+            <p>Vendor Directory Portal</p>
+        </div>
+        <div class="login-body">
+            <button class="auth-button" onclick="loginWithAuth0()">
+                Login with Auth0
+            </button>
+
+            <div class="info-text">
+                Secure authentication powered by Auth0
+            </div>
+
+            <div class="feature-list">
+                <h3>What you'll get:</h3>
+                <ul>
+                    <li>Full admin access to Lexicon</li>
+                    <li>Manage vendor directory</li>
+                    <li>View vendor listings</li>
+                    <li>Separate from CRM access</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loginWithAuth0() {
+            window.location.href = '/api/method/lexicon.lexicon.auth.oauth.auth0_login';
+        }
+    </script>
+</body>
+</html>

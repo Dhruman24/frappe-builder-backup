@@ -1,0 +1,175 @@
+{% extends "frappe/templates/web.html" %}
+
+{% block page_content %}
+<div class="page-card">
+    <div class="page-card-head">
+        <span class="indicator blue">{{ _("Login") }}</span>
+    </div>
+    <div id="login_area">
+
+        <!-- Auth0 Login Buttons Section -->
+        <div class="auth0-buttons-section" style="margin-bottom: 30px;">
+            <h4 style="text-align: center; margin-bottom: 20px; color: #555;">Login with Auth0</h4>
+
+            <!-- Vendor Manager Login Button -->
+            <button
+                class="btn btn-primary btn-block btn-lg auth0-vendor-btn"
+                onclick="window.location.href='/api/method/vendor_manager.auth.oauth.auth0_login'"
+                style="margin-bottom: 15px;
+                       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                       border: none;
+                       padding: 15px;
+                       font-size: 16px;
+                       font-weight: 600;">
+                🏢 Login to Vendor Manager with Auth0
+            </button>
+
+            <!-- Lexicon Login Button -->
+            <button
+                class="btn btn-primary btn-block btn-lg auth0-lexicon-btn"
+                onclick="window.location.href='/api/method/lexicon.lexicon.auth.oauth.auth0_login'"
+                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                       border: none;
+                       padding: 15px;
+                       font-size: 16px;
+                       font-weight: 600;">
+                📚 Login to Lexicon with Auth0
+            </button>
+
+            <div class="text-center" style="margin-top: 15px; color: #888; font-size: 13px;">
+                Secure authentication powered by Auth0
+            </div>
+
+            <div class="or-line" style="text-align: center; margin: 30px 0; position: relative;">
+                <span style="background: white; padding: 0 15px; position: relative; z-index: 1; color: #888;">
+                    OR
+                </span>
+                <hr style="position: absolute; top: 50%; left: 0; right: 0; margin: 0; border-color: #ddd;">
+            </div>
+        </div>
+
+        <!-- Standard Frappe Login Form -->
+        <form class="form-signin page-card-form" role="form"
+            data-event="login" data-error-target="#login-error-div">
+
+            <div class="form-group">
+                <input type="text" id="login_email"
+                    class="form-control" placeholder="{{ _('Email or Username') }}"
+                    required autofocus>
+            </div>
+
+            <div class="form-group">
+                <input type="password" id="login_password"
+                    class="form-control" placeholder="{{ _('Password') }}"
+                    required>
+            </div>
+
+            <div id="login-error-div"></div>
+
+            <button class="btn btn-default btn-block btn-login" type="submit">
+                {{ _("Login") }}
+            </button>
+
+            <p class="text-center" style="margin-top: 20px;">
+                <a href="/update-password">{{ _("Forgot Password?") }}</a>
+            </p>
+
+            {% if ldap_settings.enabled %}
+            <div style="margin-top: 20px;">
+                <button class="btn btn-default btn-block btn-ldap-login"
+                    onclick="return ldap_login();">
+                    {{ _("Login via LDAP") }}
+                </button>
+            </div>
+            {% endif %}
+
+        </form>
+
+        {% if social_login %}
+        <div class="social-logins" style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+            <div class="text-center text-muted" style="margin-bottom: 15px;">
+                {{ _("Other Login Options") }}
+            </div>
+            {% for provider in social_login %}
+            <a href="{{ provider.auth_url }}" class="btn btn-default btn-block btn-social"
+                style="margin-bottom: 10px;">
+                {% if provider.icon %}
+                <img src="{{ provider.icon }}" alt="{{ provider.provider_name }}"
+                    style="height: 18px; width: 18px; margin-right: 8px;">
+                {% endif %}
+                {{ _("Login with {0}").format(provider.provider_name) }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+.auth0-vendor-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(240, 147, 251, 0.4);
+    transition: all 0.2s ease;
+}
+
+.auth0-lexicon-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+    transition: all 0.2s ease;
+}
+
+.page-card {
+    max-width: 450px;
+    margin: 50px auto;
+}
+
+.or-line {
+    position: relative;
+}
+
+.or-line hr {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    margin: 0;
+    z-index: 0;
+}
+
+.or-line span {
+    position: relative;
+    z-index: 1;
+}
+</style>
+
+<script>
+// Handle standard login form submission
+document.querySelector('.form-signin').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var email = document.getElementById('login_email').value;
+    var password = document.getElementById('login_password').value;
+
+    frappe.call({
+        method: 'login',
+        args: {
+            usr: email,
+            pwd: password
+        },
+        callback: function(r) {
+            if (r.message === 'Logged In') {
+                window.location.href = '/app';
+            }
+        },
+        error: function(r) {
+            document.getElementById('login-error-div').innerHTML =
+                '<div class="alert alert-danger">' +
+                (r.message || 'Invalid username or password') +
+                '</div>';
+        }
+    });
+});
+</script>
+
+{% endblock %}

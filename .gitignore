@@ -65,3 +65,6 @@ docker-compose.override.yml
 
 # Custom apps directory - we want these in the repo!
 # apps/ (commented out - we want these custom apps in the repo)
+
+# Auth0 credentials - DO NOT commit sensitive data
+config/auth0_credentials.json
