@@ -59,53 +59,35 @@ def lexicon_callback(code=None, state=None, error=None):
     user_response = requests.get(userinfo_url, headers=headers)
     user_info = user_response.json()
     
-    # Create or update Frappe user with Lexicon prefix
+    # Create or update Frappe user (NO prefix - use actual email)
     auth0_email = user_info.get('email')
     if auth0_email:
-        # Use prefixed email for Lexicon users to separate from CRM users
-        lexicon_email = f"lexicon-{auth0_email}"
-
-        # IMPORTANT: Check if CRM user exists with same base email
-        # This prevents accidental cross-login
-        crm_email = f"crm-{auth0_email}"
-        if frappe.db.exists('User', crm_email):
-            frappe.logger().warning(f"CRM user {crm_email} exists. Creating separate Lexicon user: {lexicon_email}")
-
         user = None
-        if not frappe.db.exists('User', lexicon_email):
-            # Create new Lexicon user
+        if not frappe.db.exists('User', auth0_email):
+            # Create new user without any roles (Admin assigns roles via GUI)
             user = frappe.get_doc({
                 'doctype': 'User',
-                'email': lexicon_email,
+                'email': auth0_email,
                 'first_name': user_info.get('given_name', auth0_email.split('@')[0]),
                 'last_name': user_info.get('family_name', ''),
                 'enabled': 1,
                 'user_type': 'System User',
                 'send_welcome_email': 0,
-                'bio': f"Lexicon user authenticated via Auth0 ({auth0_email})"
+                'bio': f"User authenticated via Auth0"
             })
             user.insert(ignore_permissions=True)
 
-            # Assign admin roles for full access
-            user.add_roles('System Manager', 'Desk User')
+            # Only add basic Desk User role - Admin assigns specific app roles via GUI
+            user.add_roles('Desk User')
             frappe.db.commit()
 
-            frappe.logger().info(f"Created new Lexicon user: {lexicon_email} from Auth0 email: {auth0_email}")
+            frappe.logger().info(f"Created new user: {auth0_email} via Auth0. Admin needs to assign roles.")
         else:
-            user = frappe.get_doc('User', lexicon_email)
-            # Ensure user has essential roles
-            essential_roles = ['System Manager', 'Desk User']
-            current_roles = [d.role for d in user.roles]
-            missing_roles = [r for r in essential_roles if r not in current_roles]
-            if missing_roles:
-                for role in missing_roles:
-                    user.add_roles(role)
-                user.save(ignore_permissions=True)
-                frappe.db.commit()
+            user = frappe.get_doc('User', auth0_email)
 
-        # Login the Lexicon-specific user
-        frappe.local.login_manager.login_as(lexicon_email)
+        # Login the user - they'll see only apps they have permission for
+        frappe.local.login_manager.login_as(auth0_email)
         frappe.local.response['type'] = 'redirect'
-        frappe.local.response['location'] = '/app/vendors'  # Redirect to Lexicon vendors page
+        frappe.local.response['location'] = '/app'  # Redirect to Frappe home
     else:
         frappe.throw(_("Email not found in Auth0 user info"))
